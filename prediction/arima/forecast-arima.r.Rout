@@ -1,0 +1,95 @@
+
+R version 3.5.1 (2018-07-02) -- "Feather Spray"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> require(graphics)
+> require(forecast)
+Loading required package: forecast
+> #require(ggplot2)
+> 
+> ##First read in the arguments listed at the command line
+> args=(commandArgs(TRUE))
+> 
+> ##args is now a list of character vectors
+> ## First check to see if arguments are passed.
+> ## Then cycle through each element of the list and evaluate the expressions.
+> if(length(args)==0){
++     print("No arguments supplied.")
++     ##supply default values
++     a = 1
++     b = 1
++     w=1
++ }else{
++     for(i in 1:length(args)){
++          eval(parse(text=args[[i]]))
++     }
++ }
+> 
+> # a and b stand for seconds
+> print(a)
+[1] 0
+> print(b)
+[1] 480
+> print(w)
+[1] 100
+> if (a>0) {A <- a/10 + 1} else {A <-0}
+> B <- b/10 + 1
+> window <-w/10
+> 
+> #First I need to load the data from my file
+> 
+> data = read.csv('cpu.csv')
+> #data = ts(data[,3],start = c(0), frequency = 1)
+> data = ts(data[,3],frequency = 1)
+> 
+> data1 <- data[A:B]
+> 
+> print (data1)
+ [1] 31  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+[26]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 NA
+> #Second I need to autofit the ARIMA
+> 
+> ARIMAfit = auto.arima(data1, approximation=FALSE,trace=FALSE)
+> summary(ARIMAfit)
+Series: data1 
+ARIMA(0,0,0) with zero mean 
+
+sigma^2 estimated as 19.61:  log likelihood=-140.03
+AIC=282.06   AICc=282.15   BIC=283.96
+
+Training set error measures:
+                    ME     RMSE       MAE MPE MAPE      MASE          ACF1
+Training set 0.6458333 4.474465 0.6458333 100  100 0.9791667 -0.0004432624
+> 
+> #Third, I am doing my forecast and I am plotting
+> forecastObject <-forecast(ARIMAfit, h=window)
+> #plot (forecastObject, xlab='Seconds', ylab = 'Total CPU load')
+> 
+> #Last, I am writing in a file the outcome of the prediction for h=N given by John
+> 
+> print (as.numeric(forecastObject$mean)[window])
+[1] 0
+> 
+> fileConn<-file("forecast.txt", "w")
+> string <- as.character(as.numeric(forecastObject$mean)[window])
+> writeLines(string, fileConn)
+> close(fileConn)
+> 
+> proc.time()
+   user  system elapsed 
+  0.650   0.050   0.755 
