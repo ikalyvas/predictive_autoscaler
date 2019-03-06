@@ -1,6 +1,9 @@
 import json
 
 import requests
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.triggers.cron import CronTrigger
+
 from vnf_detector import settings
 
 
@@ -35,7 +38,18 @@ class VnfDetector(object):
             print json.dumps(vnfd, indent=4, sort_keys=True)
 
 
+    def post_to_metrics_manager(self):
+        pass
+
+
 if __name__ == '__main__':
 
+    scheduler = BlockingScheduler()
     v = VnfDetector()
-    v.get_vnfs()
+    scheduler.add_job(v.get_vnfs, CronTrigger.from_crontab(settings.VNF_SCHEDULER_CRON_EXPRESSION))
+
+    try:
+        print 'Starting scheduler'
+        scheduler.start()
+    except (SystemExit, KeyboardInterrupt):
+        raise

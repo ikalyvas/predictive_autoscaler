@@ -1,0 +1,2 @@
+ django==1.11.20
+ djangorestframework==3.9.2

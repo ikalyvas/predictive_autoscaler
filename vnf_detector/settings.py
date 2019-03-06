@@ -7,3 +7,6 @@ LOGIN_DATA = {'username': 'admin',
               'csrfmiddlewaretoken': None,
               'next': ''
               }
+
+
+VNF_SCHEDULER_CRON_EXPRESSION = '*/1 * * * *'
