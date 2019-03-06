@@ -1,3 +1,5 @@
+import json
+
 import requests
 from vnf_detector import settings
 
@@ -30,7 +32,10 @@ class VnfDetector(object):
         print 'Found {instances} vnf instances'.format(instances=len(vnfs))
         for vnfd in vnfs:
             print 'vnf_identifier:\t{id}'.format(id=vnfd['id'])
+            print json.dumps(vnfd, indent=4, sort_keys=True)
 
 
-v = VnfDetector()
-v.get_vnfs()
+if __name__ == '__main__':
+
+    v = VnfDetector()
+    v.get_vnfs()
