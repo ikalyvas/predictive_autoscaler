@@ -103,3 +103,20 @@ docker service update --force osm_metrics_kafka-exporter
 curl 'http://127.0.0.1:9091/api/v1/query_range?query=kafka_exporter_topic_cpu_utili
 zation&start=2019-03-21T20:20:00.000Z&end=2019-03-21T23:20:00.000Z&step=15s'
 ```
+
+# How to scale out / scale in a vdu in an NS from OSM #
+
+1. Use a VNFD following the example found in https://osm.etsi.org/wikipub/index.php/OSM_Autoscaling
+2. After having created an NS and the constituent vnfs go to postman
+  * Get a valid token
+  * Issue https://35.228.24.156:9999/osm/nslcm/v1/ns_instances/<ns-id>/scale
+    where ns-id is the id taken from OSM
+    The body of the request is of the following form
+```
+{"scaleType":"SCALE_VNF",
+"scaleVnfData": {"scaleVnfType":"SCALE_OUT",
+"scaleByStepData": {"scaling-group-descriptor": "vnf_autoscale","member-vnf-index": "1"}}}
+```
+
+```__vnf_autoscale__``` is a descriptor defined at VNFD level.(it is a custome name in other words to define a scaling descriptor)
+
