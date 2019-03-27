@@ -1,6 +1,6 @@
 HTTP = "http://"
 HTTPS = "https://"
-OSM_SERVER_IP = "34.73.14.235"
+OSM_SERVER_IP = "35.228.24.156"
 NBI_PORT = "9999"
 NBI_SERVER_PORT = OSM_SERVER_IP + ":" + NBI_PORT
 OSM_SOCKET_ADDR = HTTP + OSM_SERVER_IP
@@ -15,4 +15,4 @@ LOGIN_DATA = {'username': 'admin',
 
 VNF_PACKAGES_URL = NBI_SOCKET_ADDR + "/osm/vnfpkgm/v1/vnf_packages"
 VNFD_URL = NBI_SOCKET_ADDR + "/osm/vnfpkgm/v1/vnf_packages/{vnf_package_id}/vnfd"
-VNF_SCHEDULER_CRON_EXPRESSION = '*/1 * * * *'
+VNF_SCHEDULER_CRON_EXPRESSION = '*/10 * * * *'
