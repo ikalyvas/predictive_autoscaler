@@ -47,6 +47,19 @@ https://osm.etsi.org/images/OSM-Whitepaper-TechContent-ReleaseFOUR-FINAL.pdf
   osm ns-metric-export --ns ns_metrics_ubuntu --vnf 1 --vdu ubuntu_vnf-VM --metric average_memory
 _utilization
   ```
+  
+  On the other hand, exporting metrics in R5 is not needed.
+  In R5 it seems that every 30 seconds a query to prometheus container is executed and every available metric in VNFD level(related to scaling) is retrieved.
+  ```
+  04/01/2019 02:13:14 PM - osm_mon.evaluator.evaluator - INFO - Querying Prometheus: http://prometheus:9090/api/v1/query?query=osm_cpu_utilization{ns_id="4438699a-cd74-458d-bf81-a8509ffac94a",vdu_name="ns_with_metrics_autoscale-1-ubuntu_vnf-VM-1",vnf_member_index="1"}
+04/01/2019 02:13:14 PM - osm_mon.evaluator.evaluator - INFO - Metric value: 0.3732249252
+04/01/2019 02:13:14 PM - osm_mon.evaluator.evaluator - INFO - Querying Prometheus: http://prometheus:9090/api/v1/query?query=osm_cpu_utilization{ns_id="4438699a-cd74-458d-bf81-a8509ffac94a",vdu_name="ns_with_metrics_autoscale-1-ubuntu_vnf-VM-1",vnf_member_index="1"}
+04/01/2019 02:13:14 PM - osm_mon.evaluator.evaluator - INFO - Querying Prometheus: http://prometheus:9090/api/v1/query?query=osm_cpu_utilization{ns_id="4438699a-cd74-458d-bf81-a8509ffac94a",vdu_name="ns_with_metrics_autoscale-2-ubuntu_vnf-VM-1",vnf_member_index="2"}
+04/01/2019 02:13:14 PM - osm_mon.evaluator.evaluator - INFO - Metric value: 0.3732249252
+04/01/2019 02:13:14 PM - osm_mon.evaluator.evaluator - INFO - Querying Prometheus: http://prometheus:9090/api/v1/query?query=osm_cpu_utilization{ns_id="4438699a-cd74-458d-bf81-a8509ffac94a",vdu_name="ns_with_metrics_autoscale-2-ubuntu_vnf-VM-1",vnf_member_index="2"}
+04/01/2019 02:13:14 PM - osm_mon.evaluator.evaluator - INFO - Metric value: 0.3732249252
+04/01/2019 02:13:14 PM - osm_mon.evaluator.evaluator - INFO - Metric value: 0.3732249252
+```
 This will send message to kafka bus for collecting metric memory_utilization about the
 vnf index:1 and for vdu ubuntu_vnf-VM .
 On the other side MON container will receive the message and start collecting from gnocchi at openstack.
@@ -97,12 +110,67 @@ docker service update --force osm_metrics_kafka-exporter
 
 ```
 3. Visit Grafana at http://1.2.3.4:3000, replacing 1.2.3.4 with the IP address of your host. Login with admin/admin credentials and visit the OSM Sample Dashboard. It should already show graphs for CPU and Memory. You can clone them and customize as desired.
-4. Prometheus can also be used to see the graph by issuing ```kafka_exporter_topic_cpu_utilization``` in the metric field. 
+4. Prometheus can also be used to see the graph by issuing ```kafka_exporter_topic_cpu_utilization```(OSM R4) or ```osm_cpu_utilization```(OSM R5)  in the metric field. 
 5. Collect metrics through Prometheus API with 
+
+For OSM R4 you can use :
 ```
 curl 'http://127.0.0.1:9091/api/v1/query_range?query=kafka_exporter_topic_cpu_utili
 zation&start=2019-03-21T20:20:00.000Z&end=2019-03-21T23:20:00.000Z&step=15s'
 ```
+or for OSM R5
+```
+curl 'http://127.0.0.1:9091/api/v1/query_range?query=osm_cpu_utili
+zation&start=2019-03-21T20:20:00.000Z&end=2019-03-21T23:20:00.000Z&step=15s'
+```
+The result is of the following form:
+```
+{"status":"success",
+"data":{"resultType":"matrix","result":
+[{"metric":{"__name__":"osm_cpu_utilization",
+           "instance":"mon:8000",
+           "job":"prometheus",
+           "ns_id":"4438699a-cd74-458d-bf81-a8509ffac94a",
+           "vdu_name":"ns_with_metrics_autoscale-1-ubuntu_vnf-VM-1",
+           "vnf_member_index":"1"},
+           "values":[[1554126885,"3.3436022593"],
+           [1554126900,"3.3436022593"],
+           [1554126915,"3.3436022593"],
+           [1554126930,"3.3436022593"],
+           [1554126945,"3.3436022593"],
+           [1554126960,"3.3436022593"],
+           [1554126975,"3.3436022593"],
+           [1554126990,"3.3436022593"],
+           [1554127005,"3.3436022593"],
+           [1554127020,"3.3436022593"],
+           [1554127035,"3.3436022593"],
+           [1554127050,"3.3436022593"],
+           [1554127065,"3.3436022593"],
+           [1554127095,"3.3436022593"],
+           [1554127110,"3.3436022593"],
+           [1554127125,"3.3436022593"],
+           [1554127140,"3.3436022593"]]},
+    {"metric":{"__name__":"osm_cpu_utilization",
+    "instance":"mon:8000",
+    "job":"prometheus",
+    "ns_id":"4438699a-cd74-458d-bf81-a8509ffac94a",
+    "vdu_name":"ns_with_metrics_autoscale-2-ubuntu_vnf-VM-1",
+    "vnf_member_index":"2"},
+    "values":[[1554126915,"3.4969479262"],[1554126930,"3.4969479262"],
+    [1554126945,"3.4969479262"],
+    [1554126960,"3.4969479262"],
+    [1554126975,"3.4969479262"],
+    [1554126990,"3.4969479262"],
+    [1554127005,"3.4969479262"],
+    [1554127020,"3.4969479262"],
+    [1554127035,"3.4969479262"],
+    [1554127050,"3.4969479262"],
+    [1554127065,"3.4969479262"],
+    [1554127080,"3.4969479262"],
+    [1554127095,"3.4969479262"],
+    [1554127110,"3.4969479262"],
+    [1554127125,"3.4969479262"],
+    [1554127140,"3.4969479262"]]}]}}```
 
 # How to scale out / scale in a vdu in an NS from OSM #
 
