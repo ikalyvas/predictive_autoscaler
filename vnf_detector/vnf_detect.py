@@ -130,7 +130,7 @@ class VnfDetector(object):
 
     def start(self):
 
-        loop = self.loop or asyncio.new_event_loop()
+        loop = self.loop or asyncio.get_event_loop()
         loop.run_until_complete(self.main())
 
 
