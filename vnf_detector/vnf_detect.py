@@ -6,6 +6,7 @@ import requests
 import yaml
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
+import logging
 
 from vnf_detector import settings
 
@@ -13,25 +14,10 @@ from vnf_detector import settings
 class VnfDetector(object):
 
     def __init__(self, loop=None):
-
-        self._token = self.get_token(loop)
+        logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
+        self.log = logging.getLogger('vnf_detector')
         self._autoscale_vnfds = {}
         self.loop = loop
-
-    def get_token(self, loop):
-
-         loop = loop or asyncio.new_event_loop()
-         get_token_task = asyncio.create_task(self._get_and_set_authentication_token(None))
-
-         while not get_token_task.done():
-
-            try:
-                 get_token_task.result()
-            except asyncio.InvalidStateError as e:
-                print(f"Getting token is still ongoing")
-            except Exception as e:
-                print(f"Getting token raised exception. {e}")
-
 
     async def _get_and_set_authentication_token(self, session):
         """
@@ -48,7 +34,7 @@ class VnfDetector(object):
                                  ssl=False)
             json_resp = await response.json()
             self._token = json_resp["id"]
-            print(f"Got token due to expiration {self._token}")
+            self.log.info(f"Got token due to expiration {self._token}")
 
         else:
             async with aiohttp.ClientSession() as session:
@@ -58,83 +44,69 @@ class VnfDetector(object):
                                         ssl=False) as response:
                     json_resp = await response.json()
                     self._token = json_resp["id"]
-                    print(f"Got token {self._token}")
+                    self.log.info(f"Got token {self._token}")
 
         return self._token
 
     async def get_vnf_package_ids(self, session):
 
-        is_token_refreshed = False
-
         headers = {
             'Accept': "application/json",
             'Authorization': 'Bearer {token}'.format(token=self._token)
          }
+
         try:
-            while not is_token_refreshed:
-                async with session.get(settings.VNF_PACKAGES_URL, headers=headers, ssl=False) as response:
 
-                    status_code = response.status
-                    print(f"Got {status_code}")
-                    if status_code == 401:
-                        new_token = await self._get_and_set_authentication_token(session)
-                        headers['Authorization'].format(token=new_token)
-                        response = await session.get(settings.VNF_PACKAGES_URL, headers=headers, ssl=False)
-                        is_token_refreshed = True
-                    else:
-                        #break
-                        pass
+            async with session.get(settings.VNF_PACKAGES_URL, headers=headers, ssl=False) as response:
 
-                    vnf_packages = await response.json()
-                    print([package["_id"] for package in vnf_packages])
-                    return [package["_id"] for package in vnf_packages]
+                status_code = response.status
+                if status_code == 401:
+                    new_token = await self._get_and_set_authentication_token(session)
+                    headers['Authorization'].format(token=new_token)
+                    response = await session.get(settings.VNF_PACKAGES_URL, headers=headers, ssl=False)
+
+                vnf_packages = await response.json()
+                return [package["_id"] for package in vnf_packages]
 
         except Exception as e:
-            print(e)
-            raise
+            self.log.exception(e)
+            #raise
 
-    def get_vnf_descriptors(self):
-
-        is_token_refreshed = False
+    async def get_vnf_descriptors(self, session):
 
         headers = {
             'Accept': "application/yaml,text/plain",
             'Authorization': 'Bearer {token}'.format(token=self._token)
          }
 
-        available_package_ids =  self.get_vnf_package_ids()
+        available_package_ids = await self.get_vnf_package_ids(session)
 
         for package_id in available_package_ids:
 
             try:
-                while not is_token_refreshed:
-                    response = requests.get(settings.VNFD_URL.format(vnf_package_id=package_id),
+
+                async with session.get(settings.VNFD_URL.format(vnf_package_id=package_id),
                                                                      headers=headers,
-                                                                     verify=False)
-                    if response.status_code == 401: #unauthorized need to refresh the token
-                        print("Get a new token due to expiration")
-                        new_token = self._get_and_set_authentication_token()
+                                                                     ssl=False) as response:
+                    status_code = response.status
+                    if status_code == 401: #unauthorized need to refresh the token
+                        new_token = await self._get_and_set_authentication_token(session)
                         headers['Authorization'].format(token=new_token)
-                        response = requests.get(settings.VNFD_URL.format(vnf_package_id=package_id),
+                        response = await session.get(settings.VNFD_URL.format(vnf_package_id=package_id),
                                                 headers=headers,
-                                                verify=False)
-                        is_token_refreshed = True
-                    else:
-                        break
-                vnfd =yaml.load(response.content)
-                description = vnfd['vnfd:vnfd-catalog']['vnfd'][0]['description']
-                if self._is_autoscale(description):
-                    self._autoscale_vnfds[package_id] = True
-                    print(self._autoscale_vnfds)
+                                                ssl=False)
+
+                    vnfd = yaml.load(await response.text())
+                    self._is_autoscale(vnfd, package_id)
+
             except Exception as e:
-                print(e)
+                self.log.exception(e)
 
-    def _is_autoscale(self, description):
+    def _is_autoscale(self, vnfd, package_id):
 
-        if isinstance(description, dict):
-            return 'autoscale' in description.keys()
-        else:
-            raise TypeError("description {description} is not of type dict.Cannot determine if needs autoscale".format(description=str(description)))
+        if 'scaling-group-descriptor' in vnfd['vnfd:vnfd-catalog']['vnfd'][0]:
+            self.log.info(f"{package_id} has autoscale support")
+            self._autoscale_vnfds[package_id] = True
 
     def get_vnfs(self):
         vnf_response = self.session.get(settings.VNF_LIST_URL)
@@ -149,31 +121,25 @@ class VnfDetector(object):
 
     async def main(self):
 
-        #self._token = await self._get_and_set_authentication_token()
+        await self._get_and_set_authentication_token(None)
 
-        async with aiohttp.ClientSession() as session:
-            #coros = [self.get_vnf_descriptors(session, url) for url in ]
-
-            #vnf_descriptors = await asyncio.gather(self.get_vnf_descriptors(session, 'http://python.org')
-            vnf_pkg_ids = await asyncio.gather(self.get_vnf_package_ids(session))
-            print(f"Returned {vnf_pkg_ids}")
+        while True:
+            async with aiohttp.ClientSession() as session:
+                await asyncio.gather(self.get_vnf_descriptors(session), return_exceptions=False)
+            await asyncio.sleep(900)
 
     def start(self):
 
         loop = self.loop or asyncio.new_event_loop()
-        #loop.run_until_complete(self._get_and_set_authentication_token(None))
         loop.run_until_complete(self.main())
 
 
 if __name__ == '__main__':
 
-    scheduler = BlockingScheduler()
     v = VnfDetector()
-    scheduler.add_job(v.start, CronTrigger.from_crontab(settings.VNF_SCHEDULER_CRON_EXPRESSION))
-    #scheduler.add_job(v.get_vnf_descriptors, CronTrigger.from_crontab(settings.VNF_SCHEDULER_CRON_EXPRESSION))
 
     try:
         print('Starting async loop')
-        scheduler.start()
+        v.start()
     except (SystemExit, KeyboardInterrupt):
         raise
