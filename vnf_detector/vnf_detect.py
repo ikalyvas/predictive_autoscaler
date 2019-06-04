@@ -62,10 +62,12 @@ class VnfDetector(object):
                 status_code = response.status
                 if status_code == 401:
                     new_token = await self._get_and_set_authentication_token(session)
-                    headers['Authorization'].format(token=new_token)
+                    headers['Authorization'] = 'Bearer ' + new_token
                     response = await session.get(settings.VNF_PACKAGES_URL, headers=headers, ssl=False)
 
                 vnf_packages = await response.json()
+                self.log.warning(f"vnf packages is {type(vnf_packages)}")
+                self.log.warning(vnf_packages)
                 return [package["_id"] for package in vnf_packages]
 
         except Exception as e:
@@ -74,12 +76,13 @@ class VnfDetector(object):
 
     async def get_vnf_descriptors(self, session):
 
+
+        available_package_ids = await self.get_vnf_package_ids(session)
+
         headers = {
             'Accept': "application/yaml,text/plain",
             'Authorization': 'Bearer {token}'.format(token=self._token)
-         }
-
-        available_package_ids = await self.get_vnf_package_ids(session)
+        }
 
         for package_id in available_package_ids:
 
@@ -91,7 +94,7 @@ class VnfDetector(object):
                     status_code = response.status
                     if status_code == 401: #unauthorized need to refresh the token
                         new_token = await self._get_and_set_authentication_token(session)
-                        headers['Authorization'].format(token=new_token)
+                        headers['Authorization'] = 'Bearer ' + new_token
                         response = await session.get(settings.VNFD_URL.format(vnf_package_id=package_id),
                                                 headers=headers,
                                                 ssl=False)
