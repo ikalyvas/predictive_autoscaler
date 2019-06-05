@@ -72,7 +72,7 @@ class VnfDetector(object):
 
         except Exception as e:
             self.log.exception(e)
-            #raise
+            raise
 
     async def get_vnf_descriptors(self, session):
 

@@ -9,6 +9,10 @@ bpython = "*"
 asyncio = "*"
 scipy = "*"
 apscheduler = "*"
+aiohttp = "*"
+pyaml = "*"
+pytest = "*"
+pytest-asyncio = "*"
 
 [dev-packages]
 
