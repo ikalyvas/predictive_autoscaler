@@ -1,0 +1,5 @@
+---
+
+config:
+      PROMETHEUS_IP: "35.228.153.231"
+      PROMETHEUS_PORT: "9091"
