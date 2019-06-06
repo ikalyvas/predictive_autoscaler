@@ -9,15 +9,14 @@ import csv
 class MetricCollector(object):
 
     def __init__(self, config):
-        self.prom_ip, self.prom_port = self.read_config(config)
+        self.prom_ip = self.read_config(config, "PROMETHEUS_IP")
+        self.prom_port = self.read_config(config, "PROMETHEUS_PORT")
+        self.granularity_interval = self.read_config(config, "DEFAULT_GRANULARITY")
         self.prom_url = "http://" + self.prom_ip + ":" + self.prom_port + "/"
 
+    def read_config(self, config, field):
 
-    def read_config(self, config):
-
-        prom_ip = yaml.load(open(config)).get("config").get("PROMETHEUS_IP")
-        prom_port = yaml.load(open(config)).get("config").get("PROMETHEUS_PORT")
-        return prom_ip, prom_port
+        return yaml.load(open(config)).get("prometheus_config").get(field)
 
     def get_cpu_load(self):
         with open('metric_cpu.csv', newline='', mode='a') as f:
@@ -44,7 +43,7 @@ class MetricCollector(object):
                     id_ += 1
 
 
-                time.sleep(1)
+                time.sleep(self.granularity_interval)
 
 if __name__ == '__main__':
     m = MetricCollector('prometheus_cfg.yaml')
