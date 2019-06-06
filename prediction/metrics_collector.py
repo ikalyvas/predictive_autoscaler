@@ -1,9 +1,8 @@
-import math
+import time
+import csv
 
 import yaml
 import requests
-import time
-import csv
 
 
 class MetricCollector(object):
