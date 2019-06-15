@@ -1,21 +1,21 @@
 {
   "scenarios": [
     {
-      "sessions": "15",
+      "sessions": "3",
       "delay": "1000",
       "video_duration": "540000",
       "next_line": "300000",
       "name":"first_"
     },
     {
-      "sessions": "15",
+      "sessions": "3",
       "delay": "1000",
       "video_duration": "240000",
       "next_line": "120000",
       "name":"second_"
     },
     {
-      "sessions": "30",
+      "sessions": "6",
       "delay": "1000",
       "video_duration": "120000",
       "next_line": "120000",
