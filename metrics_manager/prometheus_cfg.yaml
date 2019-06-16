@@ -3,5 +3,5 @@
 prometheus_config:
       PROMETHEUS_IP: "35.228.153.231"
       PROMETHEUS_PORT: "9091"
-      DEFAULT_GRANULARITY: 1
+      DEFAULT_GRANULARITY: 120
       METRICS_FILE: "metric_cpu.csv"

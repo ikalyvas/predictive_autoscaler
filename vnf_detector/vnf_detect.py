@@ -111,8 +111,15 @@ class VnfDetector(object):
             self.log.info(f"{package_id} has autoscale support")
             self._autoscale_vnfds[package_id] = True
 
-    def get_vnfs(self):
-        vnf_response = self.session.get(settings.VNF_LIST_URL)
+    async def get_vnfs(self):
+
+        await self._get_and_set_authentication_token(None)
+        headers = {
+            'Accept': "application/yaml,text/plain",
+            'Authorization': 'Bearer {token}'.format(token=self._token)
+        }
+
+        vnf_response = requests.get(settings.VNF_LIST_URL, headers=headers, verify=False)
         vnf_instances = vnf_response.json()
 
         vnfs = vnf_instances.get('instances')
@@ -131,18 +138,19 @@ class VnfDetector(object):
                 await asyncio.gather(self.get_vnf_descriptors(session), return_exceptions=False)
             await asyncio.sleep(900)
 
-    def start(self):
+    def start(self, awaitable):
 
         loop = self.loop or asyncio.get_event_loop()
-        loop.run_until_complete(self.main())
+        loop.run_until_complete(awaitable)
 
 
 if __name__ == '__main__':
 
     v = VnfDetector()
+    # v.get_vnfs()
 
     try:
         print('Starting async loop')
-        v.start()
+        v.start(v.main())
     except (SystemExit, KeyboardInterrupt):
         raise
