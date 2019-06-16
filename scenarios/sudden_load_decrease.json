@@ -3,22 +3,22 @@
     {
       "sessions": "3",
       "delay": "1000",
-      "video_duration": "540000",
-      "next_line": "300000",
+      "video_duration": "330000",
+      "next_line": "360000",
       "name":"first_"
     },
     {
-      "sessions": "3",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "240000",
-      "next_line": "120000",
+      "video_duration": "360000",
+      "next_line": "180000",
       "name":"second_"
     },
     {
-      "sessions": "6",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "120000",
-      "next_line": "120000",
+      "video_duration": "180000",
+      "next_line": "180000",
       "name":"third_"
     }
   ]
