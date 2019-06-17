@@ -1,6 +1,5 @@
 DEFAULT_GRANULARITY = 120
-TRAINING_PHASE_DELAY = 6 * DEFAULT_GRANULARITY  # time to wait before we start predictions
-METRICS_FILE = "metric_cpu.csv"
+TRAINING_PHASE_DELAY = 3 * DEFAULT_GRANULARITY  # time to wait before we start predictions
 HTTP = "http://"
 HTTPS = "https://"
 OSM_SERVER_IP = "35.228.153.231"

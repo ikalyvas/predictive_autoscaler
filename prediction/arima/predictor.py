@@ -1,4 +1,5 @@
 import logging
+import os
 
 import requests
 from statsmodels.tsa.arima_model import ARIMA
@@ -9,15 +10,14 @@ import time
 import bisect
 import csv
 
-from prediction.arima.settings import TRAINING_PHASE_DELAY, \
-    METRICS_FILE, \
+from arima.settings import TRAINING_PHASE_DELAY, \
     DEFAULT_GRANULARITY, \
     NBI_AUTHENTICATION_URL, \
     LOGIN_DATA, \
     NBI_SOCKET_ADDR, \
     COOLDOWN
 
-from typing import List
+from typing import List, Optional
 
 Metrics = namedtuple("Metrics", ["CPU_LOAD", "TIMESTAMP", "VDU_COUNT", "NS_ID", "VNF_MEMBER_INDEX"])
 
@@ -41,16 +41,7 @@ class Predictor(object):
 
         self.log = logging.getLogger('predictor')
 
-    @classmethod
-    def get_predictor_class(cls, model):
-        if model == "ARIMA":
-            return ARIMA
-        if model == "Simple Holt-Winters":
-            return SimpleExpSmoothing
-        if model == "Exponential Holt-Winters":
-            return ExponentialSmoothing
-
-    def predict_arima(self):
+    def predict_arima(self) -> Optional[None]:
 
         self.log.info(f"Waiting {TRAINING_PHASE_DELAY}s for gathering some historical data from Prometheus")
         time.sleep(TRAINING_PHASE_DELAY)
@@ -90,7 +81,7 @@ class Predictor(object):
 
                 time.sleep(DEFAULT_GRANULARITY)
 
-    def scale_out(self, num, ns_id, vnf_member_index):
+    def scale_out(self, num: int, ns_id: str, vnf_member_index: str) -> Optional[None]:
 
         token = self.get_authentication_token()
 
@@ -121,7 +112,7 @@ class Predictor(object):
         else:
             self.log.warning(f"({num}) is insufficient for scaling out.Cannot scale by {num}")
 
-    def scale_in(self, num, ns_id, vnf_member_index):
+    def scale_in(self, num: int, ns_id: str, vnf_member_index: str) -> Optional[None]:
 
         token = self.get_authentication_token()
 
@@ -152,7 +143,7 @@ class Predictor(object):
         else:
             self.log.warning(f"({num}) is insufficient for scaling in.Cannot scale by {num}")
 
-    def get_authentication_token(self):
+    def get_authentication_token(self) -> str:
         """
         :return: token to be used in subsequent requests to NBI API
         """
@@ -170,47 +161,10 @@ class Predictor(object):
         self.log.info(f"Got token {token}")
         return token
 
-    def decide_to_scale(self, scale_data, obs_timestamp, obs_cpu_load, prediction, window_confidence,
-                        acceptable_threshold):
-        valid_prediction_count = window_confidence - 1
-        data_len = len(scale_data)
-        print(f"scale_data has {data_len} length")
-        print(f"scale data is {scale_data}")
-        if 0 < data_len < window_confidence:
-            last_sample_timestamp = list(scale_data.keys())[-1]
-            last_predicted_cpu_load = list(scale_data.values())[-1]
-            print(f"last_sample_timestamp is {last_sample_timestamp}")
-            print(f"observed_timestamp is {obs_timestamp}")
-            difference_timestamps = round(obs_timestamp - last_sample_timestamp)
-
-            if difference_timestamps == 0:
-                print(f"predicted timestamp with observed_timestamp differs by {difference_timestamps}")
-                if abs(obs_cpu_load - last_predicted_cpu_load) > acceptable_threshold:
-                    pass
-
-            if difference_timestamps > DEFAULT_GRANULARITY:
-                print(
-                    f"Received timestamp {obs_timestamp} differs more than {DEFAULT_GRANULARITY} (actual difference):{difference_timestamps} with previous sample timestamp {last_sample_timestamp}")
-                print(f"Resetting scale_data")
-                scale_data.clear()
-                return False
-            else:
-                scale_data[obs_timestamp] = prediction
-                if len(scale_data) == window_confidence:
-                    print(f"Hit window confidence.Resetting scale_data")
-                    scale_data.clear()  # initialize the scale data for next metric value
-                    return True  # reached the window confidence
-                else:
-                    return False  # we have just one sample in scale data, and pushing the next one.
-        elif data_len == 0:
-            print(
-                f"Initial scale data empty.Setting as predicted value to the next minute {obs_timestamp + DEFAULT_GRANULARITY}:{prediction}")
-            scale_data[obs_timestamp + DEFAULT_GRANULARITY] = prediction
-            return False
-
     def get_data(self) -> List[Metrics]:
         data = []
         fieldnames = ["ID", "NS_ID", "VNF_MEMBER_INDEX", "TIMESTAMP", "CPU_LOAD", "VDU_COUNT"]
+        METRICS_FILE = os.environ.get("METRICS_FILE")
         with open(METRICS_FILE, newline='') as metrics_file:
             reader = csv.DictReader(metrics_file, fieldnames=fieldnames)
             header = next(reader)
@@ -223,5 +177,4 @@ class Predictor(object):
 
 if __name__ == '__main__':
     p = Predictor()
-    model = Predictor.get_predictor_class("ARIMA")
     p.predict_arima()

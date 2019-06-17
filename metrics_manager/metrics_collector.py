@@ -2,6 +2,7 @@ import logging
 import time
 import csv
 from itertools import groupby
+import os
 
 import yaml
 import requests
@@ -13,7 +14,7 @@ class MetricCollector(object):
         self.prom_ip = self.read_config(config, "PROMETHEUS_IP")
         self.prom_port = self.read_config(config, "PROMETHEUS_PORT")
         self.granularity_interval = self.read_config(config, "DEFAULT_GRANULARITY")
-        self.metric_file = self.read_config(config, "METRICS_FILE")
+        self.metric_file = os.environ.get("METRICS_FILE")
         self.prom_url = "http://" + self.prom_ip + ":" + self.prom_port + "/"
         logging.basicConfig(
             level=logging.INFO,
@@ -29,8 +30,10 @@ class MetricCollector(object):
 
         return yaml.load(open(config)).get("prometheus_config").get(field)
 
+
     def get_cpu_load(self):
-        with open(self.metric_file, newline='', mode='a') as f:
+
+        with open(self.metric_file, newline='', mode='w') as f:
             fieldnames = ["ID", "NS_ID", "VNF_MEMBER_INDEX", "TIMESTAMP", "CPU_LOAD", "VDU_COUNT"]
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader() if f.tell() == 0 else True
