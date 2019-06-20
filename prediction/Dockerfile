@@ -5,7 +5,6 @@ COPY . /opt/code_predict
 WORKDIR /opt/code_predict
 
 ENV PYTHONPATH /opt:$PYTHONPATH
-ENV METRICS_FILE /opt/metric_file_location/metric_cpu.csv
 ENV DEFAULT_GRANULARITY 120
 ENV TRAINING_PHASE_DELAY $DEFAULT_GRANULARITY*3
 ENV HTTP "http://"
