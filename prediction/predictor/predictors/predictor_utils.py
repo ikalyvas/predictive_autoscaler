@@ -126,7 +126,9 @@ class HoltWinters(Predictor):
         index = bisect.bisect_left(cpu_load_to_vdus, (predicted_value,))
         needed_vdus_for_predicted_value = cpu_load_to_vdus[index].VDU_COUNT
         self.log.info(
-            f"Predicted cpu load is {predicted_value}.Need {needed_vdus_for_predicted_value} for this cpu load.")
+            f"Predicted cpu load is {predicted_value}."
+            f"Need {needed_vdus_for_predicted_value} for this cpu load."
+            f"Current number of VDUs is {latest_vdu_count}")
 
         if needed_vdus_for_predicted_value > latest_vdu_count:  # need scale out
             num_of_vdus_for_scale_out = needed_vdus_for_predicted_value - latest_vdu_count
@@ -180,7 +182,9 @@ class Arima(Predictor):
         index = bisect.bisect_left(cpu_load_to_vdus, (predicted_value,))
         needed_vdus_for_predicted_value = cpu_load_to_vdus[index].VDU_COUNT
         self.log.info(
-            f"Predicted cpu load is {predicted_value}.Need {needed_vdus_for_predicted_value} for this cpu load.")
+            f"Predicted cpu load is {predicted_value}."
+            f"Need {needed_vdus_for_predicted_value} for this cpu load."
+            f"Current number of VDUs is {latest_vdu_count}")
 
         if needed_vdus_for_predicted_value > latest_vdu_count:  # need scale out
             num_of_vdus_for_scale_out = needed_vdus_for_predicted_value - latest_vdu_count

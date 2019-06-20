@@ -46,12 +46,12 @@ def predict(request):
     cpu_load = [metric["cpu_load"] for metric in num_of_metrics]
 
     # now reverse the metric queryset so that we take the latest by timestamp values
-    num_of_metrics.reverse()
-    vdu_count = [metric["vdu_count"] for metric in num_of_metrics][0]
-    ns_id = num_of_metrics[0]["ns_id"]
-    scaling_group_descriptor = num_of_metrics[0]["scaling_group_descriptor"]
-    cooldown_period = num_of_metrics[0]["cooldown_period"]
-    vnf_member_index = num_of_metrics[0]["vnf_member_index"]
+    reversed_num_of_metrics = num_of_metrics.reverse()
+    vdu_count = [metric["vdu_count"] for metric in reversed_num_of_metrics][0]
+    ns_id = reversed_num_of_metrics[0]["ns_id"]
+    scaling_group_descriptor = reversed_num_of_metrics[0]["scaling_group_descriptor"]
+    cooldown_period = reversed_num_of_metrics[0]["cooldown_period"]
+    vnf_member_index = reversed_num_of_metrics[0]["vnf_member_index"]
     data = {"cpu_load": cpu_load,
             "ns_id": ns_id,
             "vdu_count": vdu_count,
@@ -78,5 +78,3 @@ def get_predictor_model():
         return HoltWinters
     else:
         raise InvalidPredictorModelError("Invalid model for prediction")
-
-d={"ns_id":"a1","cpu_load":1.45352,"vdu_count":2,"scaling_group_descriptor":"vnf_autoscale","vnf_member_index":1,"cooldown_period":3}

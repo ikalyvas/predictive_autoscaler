@@ -9,7 +9,7 @@ class Results(models.Model):
 
 class Metric(models.Model):
     ns_id = models.CharField(max_length=150)
-    vnf_member_index = models.IntegerField()
+    vnf_member_index = models.CharField(max_length=5)
     scaling_group_descriptor = models.CharField(max_length=150)
     cooldown_period = models.FloatField()
     vdu_count = models.IntegerField()
