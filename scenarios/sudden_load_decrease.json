@@ -1,25 +1,32 @@
 {
   "scenarios": [
     {
-      "sessions": "3",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "330000",
-      "next_line": "360000",
+      "video_duration": "120000",
+      "next_line": "130000",
       "name":"first_"
     },
     {
       "sessions": "4",
       "delay": "1000",
-      "video_duration": "360000",
-      "next_line": "180000",
+      "video_duration": "120000",
+      "next_line": "130000",
       "name":"second_"
     },
     {
-      "sessions": "1",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "180000",
-      "next_line": "180000",
+      "video_duration": "120000",
+      "next_line": "130000",
       "name":"third_"
+    },
+    {
+      "sessions": "8",
+      "delay": "1000",
+      "video_duration": "120000",
+      "next_line": "130000",
+      "name":"fourth_"
     }
   ]
 }
