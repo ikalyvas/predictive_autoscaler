@@ -149,7 +149,7 @@ class MetricCollector(object):
                 self.logger.warning(f"No results yet.Retrying in {self.granularity_interval} seconds")
             time.sleep(self.granularity_interval)
 
-    def post_metric(self, ns_id: str, vnf_member_index: int, cpu_load: float, vdu_count: int, cooldown: int,
+    def post_metric(self, ns_id: str, vnf_member_index: str, cpu_load: float, vdu_count: int, cooldown: int,
                     scale_group_name: str, timestamp: float):
 
         data = {"ns_id": ns_id, "vnf_member_index": vnf_member_index,
