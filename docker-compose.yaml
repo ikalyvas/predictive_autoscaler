@@ -1,43 +1,38 @@
-version: '3.2'
+version: '3.7'
 
 services:
-  ms_elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.1
-    container_name: "ms_elastic"
-    restart: always
-    hostname: "elastic"
+  db:
+    image: postgres:10.1-alpine
+    hostname: db_container
     networks:
       - gateway
-    environment:
-      - "PS1=$$(whoami)@$$(hostname) $$ "
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    ports:
-      - "9002:9002"
-      - "9300:9300"
     volumes:
-      - es_data:/usr/share/elasticsearch/data
-
-  ms_vnf_detector:
-    container_name: "ms_vnf_detector"
-    restart: always
-    hostname: "vnf_detector"
+      - postgres_data:/var/lib/postgresql/data/
     environment:
-      - "PS1=$$(whoami)@$$(hostname) $$ "
+      - POSTGRES_USER=predictor
+      - POSTGRES_PASSWORD=predictor
+      - POSTGRES_DB=predictor
+  predictors:
+    image: 5ginfire_predictors
+    hostname: predictors_container
     networks:
       - gateway
-    image: vnf_detector_img
-    build:
-      context: vnf_detector/
-      dockerfile: $PWD/vnf_detector/Dockerfile
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+  metric_collector:
+    image: 5ginfire_metric_collector
+    hostname: metrics_container
+    networks:
+      - gateway
+    depends_on:
+      - predictors
 
 volumes:
-  es_data:
+  postgres_data:
 
 networks:
-  gateway: {}
+  gateway:
+    external:
+      name: gateway

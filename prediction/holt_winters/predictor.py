@@ -3,15 +3,14 @@ import os
 
 import requests
 from collections import namedtuple
-from typing import List, Optional
 import time
 import bisect
 import csv
+from typing import List, Optional
 
-from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 from arima.settings import LOGIN_DATA
-
 
 Metrics = namedtuple("Metrics", ["CPU_LOAD", "TIMESTAMP", "VDU_COUNT", "NS_ID", "VNF_MEMBER_INDEX"])
 
@@ -40,11 +39,11 @@ class Predictor(object):
 
         self.log = logging.getLogger('predictor')
 
-    def predict_arima(self) -> Optional[None]:
+    def predict_holt_winters(self) -> Optional[None]:
 
         self.log.info(f"Waiting {self.TRAINING_PHASE_DELAY}s for gathering some historical data from Prometheus")
         time.sleep(self.TRAINING_PHASE_DELAY)
-        self.log.info(f"Start predicting with ARIMA")
+        self.log.info(f"Start predicting with Holt-Winters")
 
         while True:
             data = self.get_data()
@@ -56,10 +55,10 @@ class Predictor(object):
 
             if cpu_load:
                 self.log.info(f"Will train with {len(cpu_load)} values")
-                model = ARIMA(cpu_load, order=(1, 1, 0))
-                model_fit = model.fit(disp=False)
+                model = ExponentialSmoothing(cpu_load, trend='additive')
+                model_fit = model.fit()
                 # make prediction
-                predicted_value = model_fit.forecast()[0][0]
+                predicted_value = model_fit.forecast()[0]
                 self.log.info(f"Predict that the next value will be {predicted_value}")
                 index = bisect.bisect_left(cpu_load_to_vdus, (predicted_value,))
                 needed_vdus_for_predicted_value = cpu_load_to_vdus[index].VDU_COUNT
@@ -150,4 +149,4 @@ class Predictor(object):
 
 if __name__ == '__main__':
     p = Predictor()
-    p.predict_arima()
+    p.predict_holt_winters()

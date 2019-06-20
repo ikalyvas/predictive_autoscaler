@@ -4,8 +4,7 @@ import aiohttp
 
 import requests
 import yaml
-from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.triggers.cron import CronTrigger
+
 import logging
 
 from vnf_detector import settings

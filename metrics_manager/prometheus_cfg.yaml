@@ -5,3 +5,6 @@ prometheus_config:
       PROMETHEUS_PORT: "9091"
       DEFAULT_GRANULARITY: 120
       METRICS_FILE: "metric_cpu.csv"
+      LOGIN_DATA:
+        username: "admin"
+        password: "admin"
