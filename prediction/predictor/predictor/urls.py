@@ -18,5 +18,5 @@ from django.urls import path, include, re_path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^predict/', include(('predictors.urls', 'predictors'), namespace='predictors'))
+    re_path(r'^api/', include(('predictors.urls', 'predictors'), namespace='predictors'))
 ]

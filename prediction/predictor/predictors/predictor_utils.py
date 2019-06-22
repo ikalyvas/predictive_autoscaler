@@ -102,6 +102,25 @@ class Predictor(object):
     def predict(self, data) -> Union[Tuple[int, str], Tuple[Any, Any]]:
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def scale_decision(self, needed_vdus, latest_vdus, ns_id, vnf_member_index, scaling_group_descriptor,
+                       cooldown_period):
+        if needed_vdus > latest_vdus:  # need scale out
+            num_of_vdus_for_scale_out = needed_vdus - latest_vdus
+            direction = "SCALE_OUT"
+            self.scale(direction, num_of_vdus_for_scale_out, ns_id, vnf_member_index, scaling_group_descriptor,
+                       cooldown_period)
+
+        elif needed_vdus < latest_vdus:  # need scale in
+            num_of_vdus_for_scale_in = latest_vdus - needed_vdus
+            direction = "SCALE_IN"
+            self.scale(direction, num_of_vdus_for_scale_in, ns_id, vnf_member_index, scaling_group_descriptor,
+                       cooldown_period)
+
+        else:
+            self.log.info(
+                f"Needed vdus are {needed_vdus}. Current vdus are {latest_vdus}.No action.")
+
 
 class HoltWinters(Predictor):
 
@@ -129,22 +148,8 @@ class HoltWinters(Predictor):
             f"Predicted cpu load is {predicted_value}."
             f"Need {needed_vdus_for_predicted_value} for this cpu load."
             f"Current number of VDUs is {latest_vdu_count}")
-
-        if needed_vdus_for_predicted_value > latest_vdu_count:  # need scale out
-            num_of_vdus_for_scale_out = needed_vdus_for_predicted_value - latest_vdu_count
-            direction = "SCALE_OUT"
-            self.scale(direction, num_of_vdus_for_scale_out, ns_id, vnf_member_index, scaling_group_descriptor,
-                       cooldown_period)
-
-        elif needed_vdus_for_predicted_value < latest_vdu_count:  # need scale in
-            num_of_vdus_for_scale_in = latest_vdu_count - needed_vdus_for_predicted_value
-            direction = "SCALE_IN"
-            self.scale(direction, num_of_vdus_for_scale_in, ns_id, vnf_member_index, scaling_group_descriptor,
-                       cooldown_period)
-
-        else:
-            self.log.info(
-                f"Needed vdus are {needed_vdus_for_predicted_value}. Current vdus are {latest_vdu_count}.No action.")
+        self.scale_decision(needed_vdus_for_predicted_value, latest_vdu_count, ns_id, vnf_member_index,
+                            scaling_group_descriptor, cooldown_period)
 
         return abs(needed_vdus_for_predicted_value - latest_vdu_count), direction
 
@@ -186,21 +191,8 @@ class Arima(Predictor):
             f"Need {needed_vdus_for_predicted_value} for this cpu load."
             f"Current number of VDUs is {latest_vdu_count}")
 
-        if needed_vdus_for_predicted_value > latest_vdu_count:  # need scale out
-            num_of_vdus_for_scale_out = needed_vdus_for_predicted_value - latest_vdu_count
-            direction = "SCALE_OUT"
-            self.scale(direction, num_of_vdus_for_scale_out, ns_id, vnf_member_index, scaling_group_descriptor,
-                       cooldown_period)
-
-        elif needed_vdus_for_predicted_value < latest_vdu_count:  # need scale in
-            num_of_vdus_for_scale_in = latest_vdu_count - needed_vdus_for_predicted_value
-            direction = "SCALE_IN"
-            self.scale(direction, num_of_vdus_for_scale_in, ns_id, vnf_member_index, scaling_group_descriptor,
-                       cooldown_period)
-
-        else:
-            self.log.info(
-                f"Needed vdus are {needed_vdus_for_predicted_value}. Current vdus are {latest_vdu_count}.No action.")
+        self.scale_decision(needed_vdus_for_predicted_value, latest_vdu_count, ns_id, vnf_member_index,
+                            scaling_group_descriptor, cooldown_period)
 
         return abs(needed_vdus_for_predicted_value - latest_vdu_count), direction
 
@@ -211,3 +203,13 @@ class InvalidPredictorModelError(Exception):
 
 class ScaleOperationError(Exception):
     pass
+
+
+def get_predictor_model():
+    predictor_model = os.environ.get("PREDICTOR_MODEL", "ARIMA")
+    if predictor_model == "ARIMA":
+        return Arima
+    elif predictor_model == "HOLTWINTERS":
+        return HoltWinters
+    else:
+        raise InvalidPredictorModelError("Invalid model for prediction")

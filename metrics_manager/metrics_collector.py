@@ -157,7 +157,7 @@ class MetricCollector(object):
                 "vdu_count": vdu_count, "cpu_load": cpu_load,
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
                 }
-        response = requests.post("http://predictors:8000/predict/", json=data,
+        response = requests.post("http://predictors:8000/api/metrics/predict/", json=data,
                                  headers={"Content-Type": "application/json"})
         if response.status_code == 201:
             self.logger.info("Metric posted successfully to predictor")

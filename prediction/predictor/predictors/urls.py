@@ -1,7 +1,6 @@
-from django.urls import re_path
-from .views import predict, metrics
+from .views import MetricsViewsSet
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    re_path(r'^$', predict),
-    re_path(r'^metrics/', metrics),
-]
+router = DefaultRouter()
+router.register(prefix='metrics', viewset=MetricsViewsSet)
+urlpatterns = router.urls
