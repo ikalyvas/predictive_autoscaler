@@ -99,11 +99,25 @@
       "name":"fourteenth_"
     },
     {
-      "sessions": "30",
+      "sessions": "32",
       "delay": "1000",
-      "video_duration": "240000",
+      "video_duration": "60000",
       "next_line": "65000",
       "name":"fifteenth_"
+    },
+    {
+      "sessions": "32",
+      "delay": "1000",
+      "video_duration": "60000",
+      "next_line": "65000",
+      "name":"sixteenth_"
+    },
+    {
+      "sessions": "32",
+      "delay": "500",
+      "video_duration": "240000",
+      "next_line": "65000",
+      "name":"seventeenth_"
     }
   ]
 }
