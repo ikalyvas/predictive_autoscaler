@@ -1,4 +1,3 @@
-import datetime
 import logging
 import time
 from itertools import groupby
@@ -25,7 +24,7 @@ logging.basicConfig(
 class MetricCollector(object):
 
     def __init__(self):
-        self.logger = logging.getLogger('metrics_manager.metrics_collector')
+        self.logger = logging.getLogger(self.__module__+'.'+self.__class__.__name__)
         self.ns_to_vnf_member_index = defaultdict(lambda: defaultdict(lambda: {}))
         self.prom_ip = os.environ.get("PROMETHEUS_IP")
         self.prom_port = os.environ.get("PROMETHEUS_PORT")
@@ -38,11 +37,6 @@ class MetricCollector(object):
         self.CPU_UTIL_METRIC_URL = self.prom_url + "api/v1/query?query=osm_cpu_utilization"
         self.login_data = {"username": "admin", "password": "admin"}
         self.authentication_token = self.get_authentication_token()
-
-    @staticmethod
-    def read_config(config, field):
-
-        return yaml.load(open(config)).get("prometheus_config").get(field)
 
     def get_authentication_token(self) -> str:
         """
@@ -160,9 +154,9 @@ class MetricCollector(object):
         response = requests.post("http://predictors:8000/api/metrics/predict/", json=data,
                                  headers={"Content-Type": "application/json"})
         if response.status_code == 201:
-            self.logger.info("Metric posted successfully to predictor")
+            self.logger.info(f"Metric posted successfully to predictor.Metric: {data}")
         else:
-            self.logger.critical(f"Could not post to predictor.Status of request:{response.status_code}")
+            self.logger.critical(f"Error while posting metric to predictor.Status of request:{response.status_code}/Msg:{response.text}")
 
 
 if __name__ == '__main__':

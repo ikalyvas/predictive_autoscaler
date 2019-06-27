@@ -10,14 +10,7 @@ from .models import Metric
 from .serializers import MetricSerializer
 from .predictor_utils import get_predictor_model
 
-logging.basicConfig(level=logging.INFO,
-                    format="%(asctime)s [%(levelname)s]  %(message)s",
-                    handlers=[
-                        logging.FileHandler("{0}.log".format("predictor")),
-                        logging.StreamHandler()
-                    ])
-
-logger = logging.getLogger('predictor')
+logger = logging.getLogger(__name__)
 
 
 class MetricsViewsSet(ModelViewSet):
@@ -59,10 +52,15 @@ class MetricsViewsSet(ModelViewSet):
                 "cooldown_period": cooldown_period,
                 "vnf_member_index": vnf_member_index
                 }
-        scale_num_of_ops, scale_direction = pr_model().predict(data)
+
+        try:
+            scale_num_of_ops, scale_direction = pr_model.predict(data)
+        except Exception:
+            logger.exception(f"Error while doing prediction.")
+            return Response(data={"msg": "Error while doing prediction"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         msg = f"{scale_direction} by {scale_num_of_ops}" if scale_direction else "No scaling operation was triggered"
         return Response(data={"msg": msg,
-                              "time": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),
-                              },
+                              "time": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),},
                         status=status.HTTP_201_CREATED)
