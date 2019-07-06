@@ -3,8 +3,8 @@
     {
       "sessions": "5",
       "delay": "1000",
-      "video_duration": "300000",
-      "next_line": "305000",
+      "video_duration": "180000",
+      "next_line": "185000",
       "name":"first_"
     },
     {
