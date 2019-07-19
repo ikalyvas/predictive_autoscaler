@@ -8,60 +8,39 @@
       "name":"first_"
     },
     {
-      "sessions": "5",
+      "sessions": "10",
       "delay": "1000",
       "video_duration": "60000",
       "next_line": "65000",
       "name":"second_"
     },
     {
-      "sessions": "10",
+      "sessions": "15",
       "delay": "1000",
       "video_duration": "60000",
       "next_line": "65000",
       "name":"third_"
     },
     {
-      "sessions": "10",
+      "sessions": "25",
       "delay": "1000",
       "video_duration": "60000",
       "next_line": "65000",
       "name":"fourth_"
     },
     {
-      "sessions": "15",
+      "sessions": "40",
       "delay": "1000",
-      "video_duration": "120000",
-      "next_line": "125000",
+      "video_duration": "60000",
+      "next_line": "65000",
       "name":"fifth_"
     },
     {
-      "sessions": "15",
+      "sessions": "65",
       "delay": "1000",
       "video_duration": "60000",
       "next_line": "65000",
       "name":"sixth_"
-    },
-    {
-      "sessions": "20",
-      "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
-      "name":"sixth_"
-    },
-    {
-      "sessions": "20",
-      "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
-      "name":"seventh_"
-    },
-    {
-      "sessions": "25",
-      "delay": "1000",
-      "video_duration": "300000",
-      "next_line": "125000",
-      "name":"eighth_"
     }
   ]
 }
