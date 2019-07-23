@@ -15,7 +15,7 @@
       "name":"second_"
     },
     {
-      "sessions": "16",
+      "sessions": "18",
       "delay": "1000",
       "video_duration": "60000",
       "next_line": "70000",
@@ -29,7 +29,7 @@
       "name":"fourth_"
     },
     {
-      "sessions": "32",
+      "sessions": "36",
       "delay": "1000",
       "video_duration": "60000",
       "next_line": "80000",
