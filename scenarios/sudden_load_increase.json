@@ -3,51 +3,30 @@
     {
       "sessions": "8",
       "delay": "1000",
-      "video_duration": "120000",
-      "next_line": "125000",
+      "video_duration": "600000",
+      "next_line": "300000",
       "name":"first_"
     },
     {
-      "sessions": "12",
+      "sessions": "8",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "70000",
+      "video_duration": "300000",
+      "next_line": "180000",
       "name":"second_"
     },
     {
-      "sessions": "18",
+      "sessions": "8",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "70000",
+      "video_duration": "120000",
+      "next_line": "180000",
       "name":"third_"
-    },
-    {
-      "sessions": "24",
-      "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "80000",
-      "name":"fourth_"
-    },
-    {
-      "sessions": "36",
-      "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "80000",
-      "name":"fifth_"
     },
     {
       "sessions": "48",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "90000",
-      "name":"sixth_"
-    },
-    {
-      "sessions": "64",
-      "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "90000",
-      "name":"seventh_"
+      "video_duration": "120000",
+      "next_line": "180000",
+      "name":"fourth_"
     }
   ]
 }
