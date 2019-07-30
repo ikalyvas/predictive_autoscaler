@@ -17,100 +17,65 @@
     {
       "sessions": "8",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
+      "video_duration": "600000",
+      "next_line": "60000",
       "name":"fifth_"
     },
     {
-      "sessions": "12",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
+      "video_duration": "600000",
+      "next_line": "60000",
       "name":"sixth_"
     },
     {
-      "sessions": "16",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
+      "video_duration": "600000",
+      "next_line": "60000",
       "name":"seventh_"
     },
     {
-      "sessions": "20",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
+      "video_duration": "600000",
+      "next_line": "60000",
       "name":"eighth_"
     },
     {
-      "sessions": "24",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
+      "video_duration": "600000",
+      "next_line": "60000",
       "name":"ninth_"
     },
     {
-      "sessions": "28",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
+      "video_duration": "600000",
+      "next_line": "60000",
       "name":"tenth_"
     },
     {
-      "sessions": "32",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
+      "video_duration": "600000",
+      "next_line": "60000",
       "name":"eleventh_"
     },
     {
-      "sessions": "36",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
+      "video_duration": "600000",
+      "next_line": "60000",
       "name":"twelveth_"
     },
     {
-      "sessions": "40",
+      "sessions": "4",
       "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
-      "name":"thirteenth_"
-    },
-    {
-      "sessions": "44",
-      "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
-      "name":"fourteenth_"
-    },
-    {
-      "sessions": "48",
-      "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
-      "name":"fifteenth_"
-    },
-    {
-      "sessions": "52",
-      "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
-      "name":"sixteenth_"
-    },
-    {
-      "sessions": "56",
-      "delay": "1000",
-      "video_duration": "60000",
-      "next_line": "65000",
-      "name":"seventeenth_"
-    },
-    {
-      "sessions": "60",
-      "delay": "1000",
-      "video_duration": "240000",
-      "next_line": "65000",
-      "name":"seventeenth_"
+      "video_duration": "600000",
+      "next_line": "60000",
+      "name":"twelveth_"
     }
   ]
 }
