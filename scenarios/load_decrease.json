@@ -19,6 +19,20 @@
       "delay": "1000",
       "video_duration": "600000",
       "next_line": "60000",
+      "name":"third_"
+    },
+    {
+      "sessions": "4",
+      "delay": "1000",
+      "video_duration": "600000",
+      "next_line": "60000",
+      "name":"fourth_"
+    },
+    {
+      "sessions": "4",
+      "delay": "1000",
+      "video_duration": "600000",
+      "next_line": "60000",
       "name":"fifth_"
     },
     {
@@ -62,20 +76,6 @@
       "video_duration": "600000",
       "next_line": "60000",
       "name":"eleventh_"
-    },
-    {
-      "sessions": "4",
-      "delay": "1000",
-      "video_duration": "600000",
-      "next_line": "60000",
-      "name":"twelveth_"
-    },
-    {
-      "sessions": "4",
-      "delay": "1000",
-      "video_duration": "600000",
-      "next_line": "60000",
-      "name":"twelveth_"
     }
   ]
 }
