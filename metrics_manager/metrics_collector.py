@@ -3,6 +3,7 @@ import time
 from itertools import groupby
 from collections import defaultdict
 import os
+from threading import Thread
 
 import yaml
 import requests
@@ -107,6 +108,13 @@ class MetricCollector(object):
 
     def get_cpu_load(self):
 
+        """
+        This method is triggered every EVALUATOR_INTERVAL in order to send any alarms/metrics to predictor API.
+        Acts same as the MON evaluator module.
+        :return:
+        """
+
+
         while True:
             response = requests.get(self.CPU_UTIL_METRIC_URL)
             resp = response.json()
@@ -136,15 +144,30 @@ class MetricCollector(object):
                         f" num_of_vdus:{vdus_num} is {total}.Cooldown:{cooldown_period}."
                         f"Scale-group-desc-name:{scale_group_descriptor_name}")
 
-                    self.post_metric(ns_id, vnf_member_index, total, vdus_num, cooldown_period,
-                                     scale_group_descriptor_name, timestamp)
+                    t = Thread(target=self.post_metric, args=(ns_id, vnf_member_index, total, vdus_num, cooldown_period,
+                                                              scale_group_descriptor_name, timestamp))
+                    t.start()
 
             else:
                 self.logger.warning(f"No results yet.Retrying in {self.granularity_interval} seconds")
+            self.logger.info(f"Going to sleep for the next {self.granularity_interval}")
             time.sleep(self.granularity_interval)
 
     def post_metric(self, ns_id: str, vnf_member_index: str, cpu_load: float, vdu_count: int, cooldown: int,
                     scale_group_name: str, timestamp: float):
+
+        """
+        Uses the API endpoint provided by the predictor container to post the available metrics for every VM found in Prometheus data
+        :param ns_id:
+        :param vnf_member_index:
+        :param cpu_load:
+        :param vdu_count:
+        :param cooldown:
+        :param scale_group_name:
+        :param timestamp:
+        :return:
+        """
+
 
         data = {"ns_id": ns_id, "vnf_member_index": vnf_member_index,
                 "scaling_group_descriptor": scale_group_name, "cooldown_period": cooldown,

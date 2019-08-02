@@ -26,6 +26,9 @@ log = logging.getLogger(__name__)
 
 
 class Predictor(object):
+    """
+    Base class for the various predictor implementations (ARIMA, HOLTWINTER, LSTM-RNN)
+    """
 
     NBI_AUTHENTICATION_URL = os.environ.get("NBI_AUTHENTICATION_URL")
     NBI_SOCKET_ADDR = os.environ.get("NBI_SOCKET_ADDR")
@@ -35,6 +38,19 @@ class Predictor(object):
     @classmethod
     def scale(cls, direction: str, num: int, ns_id: str, vnf_member_index: str,
               scaling_group_descriptor: str, cooldown_period: int) -> None:
+
+        """
+        Main scale function which uses the LCM endpoint to send the scale out / scale in requests upon decision.
+        Uses the cooldown period between the scale operations.
+        :param direction:
+        :param num:
+        :param ns_id:
+        :param vnf_member_index:
+        :param scaling_group_descriptor:
+        :param cooldown_period:
+        :return:
+        """
+
 
         token = cls.get_authentication_token()
 
@@ -92,11 +108,29 @@ class Predictor(object):
 
     @abc.abstractmethod
     def predict(self, data) -> Union[Tuple[int, str], Tuple[Any, Any]]:
+        """
+        Abstract base method for prediction.Implemented in child classes
+        :param data:
+        :return:
+        """
         raise NotImplementedError
 
     @classmethod
     def scale_decision(cls, needed_vdus, latest_vdus, ns_id, vnf_member_index, scaling_group_descriptor,
                        cooldown_period):
+
+        """
+        Method that contains the logic for triggering any scale operation.It uses the total cpu load for all of the VMs that are posted by the metric collector
+        and acts accordingly in order to decide if scale is needed.
+        :param needed_vdus:
+        :param latest_vdus:
+        :param ns_id:
+        :param vnf_member_index:
+        :param scaling_group_descriptor:
+        :param cooldown_period:
+        :return:
+        """
+
         if needed_vdus > latest_vdus:  # need scale out
             num_of_vdus_for_scale_out = needed_vdus - latest_vdus
             direction = "SCALE_OUT"
@@ -117,6 +151,11 @@ class HoltWinters(Predictor):
 
     @classmethod
     def predict(cls, data) -> Union[Tuple[int, str], Tuple[Any, Any]]:
+        """
+        HoltWinters implementation
+        :param data:
+        :return:
+        """
 
         direction = ""
         log.info(f"Start predicting with Holt-Winters")
@@ -150,6 +189,12 @@ class Arima(Predictor):
 
     @classmethod
     def predict(cls, data) -> Union[Tuple[int, str], Tuple[Any, Any]]:
+
+        """
+        ARIMA implementation
+        :param data:
+        :return:
+        """
 
         direction = ""
         log.info(f"Start predicting with Arima")
@@ -194,6 +239,12 @@ class Lstm(Predictor):
 
     @classmethod
     def predict(cls, data) -> Union[Tuple[int, str], Tuple[Any, Any]]:
+
+        """
+        Long Short-Term Memory (Recurrent Neural Networks) implementation
+        :param data:
+        :return:
+        """
 
         n_features = 1 # univariate variable
         num_of_steps = 3 # need to take if from env?
@@ -246,6 +297,11 @@ class ScaleOperationError(Exception):
 
 
 def get_predictor_model():
+    """
+    Method that returns the model we want to use for prediction.Driven by an environment variable.
+    :return:
+    """
+
     predictor_model = os.environ.get("PREDICTOR_MODEL", "ARIMA")
     if predictor_model == "ARIMA":
         return Arima
