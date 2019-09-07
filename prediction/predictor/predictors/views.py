@@ -29,7 +29,7 @@ class MetricsViewsSet(ModelViewSet):
         metric = serializer.save()
 
         num_of_metrics = Metric.objects.filter(ns_id=metric.ns_id, vnf_member_index=metric.vnf_member_index). \
-            values("ns_id", "vnf_member_index", "cooldown_period", "scaling_group_descriptor", "vdu_count", "cpu_load")
+            values("ns_id", "vnf_member_index", "scaling_group_descriptor", "vdu_count", "cpu_load")
         logger.info(
             f"Found {len(num_of_metrics)} metrics for ns_id:{metric.ns_id}/vnf_member_index:{metric.vnf_member_index}")
 
@@ -43,13 +43,11 @@ class MetricsViewsSet(ModelViewSet):
         vdu_count = [metric["vdu_count"] for metric in reversed_num_of_metrics][0]
         ns_id = reversed_num_of_metrics[0]["ns_id"]
         scaling_group_descriptor = reversed_num_of_metrics[0]["scaling_group_descriptor"]
-        cooldown_period = reversed_num_of_metrics[0]["cooldown_period"]
         vnf_member_index = reversed_num_of_metrics[0]["vnf_member_index"]
         data = {"cpu_load": cpu_load,
                 "ns_id": ns_id,
                 "vdu_count": vdu_count,
                 "scaling_group_descriptor": scaling_group_descriptor,
-                "cooldown_period": cooldown_period,
                 "vnf_member_index": vnf_member_index
                 }
 

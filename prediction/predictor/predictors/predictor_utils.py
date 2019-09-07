@@ -37,17 +37,15 @@ class Predictor(object):
 
     @classmethod
     def scale(cls, direction: str, num: int, ns_id: str, vnf_member_index: str,
-              scaling_group_descriptor: str, cooldown_period: int) -> None:
+              scaling_group_descriptor: str) -> None:
 
         """
         Main scale function which uses the LCM endpoint to send the scale out / scale in requests upon decision.
-        Uses the cooldown period between the scale operations.
         :param direction:
         :param num:
         :param ns_id:
         :param vnf_member_index:
         :param scaling_group_descriptor:
-        :param cooldown_period:
         :return:
         """
 
@@ -82,7 +80,7 @@ class Predictor(object):
                 else:
                     log.info(
                         f"{direction} operation sent to LCM at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
-                time.sleep(cooldown_period)
+                time.sleep(1)
 
         else:
             log.warning(f"({num}) is insufficient for {direction}.Cannot scale by {num}")
@@ -116,8 +114,7 @@ class Predictor(object):
         raise NotImplementedError
 
     @classmethod
-    def scale_decision(cls, needed_vdus, latest_vdus, ns_id, vnf_member_index, scaling_group_descriptor,
-                       cooldown_period):
+    def scale_decision(cls, needed_vdus, latest_vdus, ns_id, vnf_member_index, scaling_group_descriptor):
 
         """
         Method that contains the logic for triggering any scale operation.It uses the total cpu load for all of the VMs that are posted by the metric collector
@@ -127,21 +124,18 @@ class Predictor(object):
         :param ns_id:
         :param vnf_member_index:
         :param scaling_group_descriptor:
-        :param cooldown_period:
         :return:
         """
 
         if needed_vdus > latest_vdus:  # need scale out
             num_of_vdus_for_scale_out = needed_vdus - latest_vdus
             direction = "SCALE_OUT"
-            cls.scale(direction, num_of_vdus_for_scale_out, ns_id, vnf_member_index, scaling_group_descriptor,
-                       cooldown_period)
+            cls.scale(direction, num_of_vdus_for_scale_out, ns_id, vnf_member_index, scaling_group_descriptor)
 
         elif needed_vdus < latest_vdus:  # need scale in
             num_of_vdus_for_scale_in = latest_vdus - needed_vdus
             direction = "SCALE_IN"
-            cls.scale(direction, num_of_vdus_for_scale_in, ns_id, vnf_member_index, scaling_group_descriptor,
-                       cooldown_period)
+            cls.scale(direction, num_of_vdus_for_scale_in, ns_id, vnf_member_index, scaling_group_descriptor)
         else:
             log.info(
                 f"Needed vdus are {needed_vdus}. Current vdus are {latest_vdus}.No action.")
@@ -165,7 +159,6 @@ class HoltWinters(Predictor):
         ns_id = data.get("ns_id")
         vnf_member_index = data.get("vnf_member_index")
         scaling_group_descriptor = data.get("scaling_group_descriptor")
-        cooldown_period = data.get("cooldown_period")
 
         log.info(f"Will train with {len(cpu_load)} values")
         model = ExponentialSmoothing(cpu_load, trend='additive')
@@ -180,7 +173,7 @@ class HoltWinters(Predictor):
             f"Need {needed_vdus_for_predicted_value} for this cpu load."
             f"Current number of VDUs is {latest_vdu_count}")
         cls.scale_decision(needed_vdus_for_predicted_value, latest_vdu_count, ns_id, vnf_member_index,
-                            scaling_group_descriptor, cooldown_period)
+                            scaling_group_descriptor)
 
         return abs(needed_vdus_for_predicted_value - latest_vdu_count), direction
 
@@ -204,7 +197,6 @@ class Arima(Predictor):
         ns_id = data.get("ns_id")
         vnf_member_index = data.get("vnf_member_index")
         scaling_group_descriptor = data.get("scaling_group_descriptor")
-        cooldown_period = data.get("cooldown_period")
 
         log.info(f"Will train with {len(cpu_load)} values")
         try:
@@ -230,7 +222,7 @@ class Arima(Predictor):
             f"Current number of VDUs is {latest_vdu_count}")
 
         cls.scale_decision(needed_vdus_for_predicted_value, latest_vdu_count, ns_id, vnf_member_index,
-                            scaling_group_descriptor, cooldown_period)
+                            scaling_group_descriptor)
 
         return abs(needed_vdus_for_predicted_value - latest_vdu_count), direction
 
@@ -262,7 +254,6 @@ class Lstm(Predictor):
         ns_id = data.get("ns_id")
         vnf_member_index = data.get("vnf_member_index")
         scaling_group_descriptor = data.get("scaling_group_descriptor")
-        cooldown_period = data.get("cooldown_period")
 
         log.info(f"Will predict with input {num_of_steps} values. Use {cpu_load}")
 
@@ -282,8 +273,7 @@ class Lstm(Predictor):
 
         cls.scale_decision(needed_vdus_for_predicted_value, latest_vdu_count,
                             ns_id, vnf_member_index,
-                            scaling_group_descriptor, cooldown_period
-                            )
+                            scaling_group_descriptor)
 
         return abs(needed_vdus_for_predicted_value - latest_vdu_count), direction
 

@@ -59,7 +59,7 @@ class MetricCollector(object):
 
     def process_metric(self, ns_id: str, vnf_member_index: int):
         """
-        Given an ns_id and a vnf_member_index it returns the scaling_group_descriptor and the cooldown period
+        Given an ns_id and a vnf_member_index it returns the scaling_group_descriptor
         of this particular ns_id---vnf_member_index group
         :return:
         """
@@ -70,8 +70,7 @@ class MetricCollector(object):
 
         if ns_id in self.ns_to_vnf_member_index and str(vnf_member_index) in self.ns_to_vnf_member_index[ns_id]:
             self.logger.info(f"Using cache for accessing...")
-            return (self.ns_to_vnf_member_index[ns_id][vnf_member_index]["cooldown_period"],
-                    self.ns_to_vnf_member_index[ns_id][vnf_member_index]["scale_group_descriptor_name"])
+            return self.ns_to_vnf_member_index[ns_id][vnf_member_index]["scale_group_descriptor_name"]
 
         retry = 3
         while retry != 0:
@@ -93,15 +92,10 @@ class MetricCollector(object):
                         vnfd = yaml.load(vnfd_response.text)
                         scale_group_descriptor_name = \
                         vnfd["vnfd:vnfd-catalog"]["vnfd"][0]["scaling-group-descriptor"][0]["name"]
-                        cooldown_period = \
-                        vnfd["vnfd:vnfd-catalog"]["vnfd"][0]["scaling-group-descriptor"][0]["scaling-policy"][0][
-                            "cooldown-time"]
-                        self.ns_to_vnf_member_index[ns_id][vnf_member_index]["cooldown_period"] = cooldown_period
                         self.ns_to_vnf_member_index[ns_id][vnf_member_index][
                             "scale_group_descriptor_name"] = scale_group_descriptor_name
 
-                        return (self.ns_to_vnf_member_index[ns_id][vnf_member_index]["cooldown_period"],
-                                self.ns_to_vnf_member_index[ns_id][vnf_member_index]["scale_group_descriptor_name"])
+                        return self.ns_to_vnf_member_index[ns_id][vnf_member_index]["scale_group_descriptor_name"]
 
                 raise ScalingDataMissingError(
                     f"Cannot find scaling group descriptor for ns-id:{ns_id} and vnf_member_index:{vnf_member_index}")
@@ -126,7 +120,7 @@ class MetricCollector(object):
                 x.get("metric").get("ns_id"), x.get("metric").get("vnf_member_index"))):
                     ns_id = key[0]
                     vnf_member_index = key[1]
-                    cooldown_period, scale_group_descriptor_name = self.process_metric(ns_id, vnf_member_index)
+                    scale_group_descriptor_name = self.process_metric(ns_id, vnf_member_index)
                     list_group = list(group)
                     vdus_num = len(list_group)
                     self.logger.info(
@@ -141,10 +135,10 @@ class MetricCollector(object):
                         total += float(cpu_load)
                     self.logger.info(
                         f"Total load for  ns_id:{ns_id} , vnf_member_index:{vnf_member_index},"
-                        f" num_of_vdus:{vdus_num} is {total}.Cooldown:{cooldown_period}."
+                        f" num_of_vdus:{vdus_num} is {total}."
                         f"Scale-group-desc-name:{scale_group_descriptor_name}")
 
-                    t = Thread(target=self.post_metric, args=(ns_id, vnf_member_index, total, vdus_num, cooldown_period,
+                    t = Thread(target=self.post_metric, args=(ns_id, vnf_member_index, total, vdus_num,
                                                               scale_group_descriptor_name, timestamp))
                     t.start()
 
@@ -153,7 +147,7 @@ class MetricCollector(object):
             self.logger.info(f"Going to sleep for the next {self.granularity_interval}")
             time.sleep(self.granularity_interval)
 
-    def post_metric(self, ns_id: str, vnf_member_index: str, cpu_load: float, vdu_count: int, cooldown: int,
+    def post_metric(self, ns_id: str, vnf_member_index: str, cpu_load: float, vdu_count: int,
                     scale_group_name: str, timestamp: float):
 
         """
@@ -162,7 +156,6 @@ class MetricCollector(object):
         :param vnf_member_index:
         :param cpu_load:
         :param vdu_count:
-        :param cooldown:
         :param scale_group_name:
         :param timestamp:
         :return:
@@ -170,7 +163,7 @@ class MetricCollector(object):
 
 
         data = {"ns_id": ns_id, "vnf_member_index": vnf_member_index,
-                "scaling_group_descriptor": scale_group_name, "cooldown_period": cooldown,
+                "scaling_group_descriptor": scale_group_name,
                 "vdu_count": vdu_count, "cpu_load": cpu_load,
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
                 }
