@@ -181,7 +181,7 @@ The result is of the following form:
     where ns-id is the id taken from OSM
     The body of the request is of the following form
 ```
-{"scaleType":"SCALE_VNF",
+```{"scaleType":"SCALE_VNF",
 "scaleVnfData": {"scaleVnfType":"SCALE_OUT",
 "scaleByStepData": {"scaling-group-descriptor": "vnf_autoscale","member-vnf-index": "1"}}}
 ```
