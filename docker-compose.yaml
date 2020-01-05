@@ -34,5 +34,5 @@ volumes:
 
 networks:
   gateway:
-    external:
-      name: gateway
+  #local:
+  #name: gateway

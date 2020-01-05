@@ -1,0 +1,25 @@
+<html>
+<body>
+<h1>Metrics</h1>
+
+{% if errors %}
+{{ errors }}
+{% else %}
+<form action="{% url 'predictors:metric-list' %}" method="post" enctype="multipart/form-data">
+    {{ form.as_p}}
+    <p><label for="id_criteria">Criteria:</label> <input name="criteria" type="text" id="id_criteria">
+    </p>
+
+    <div class="form-actions-no-box">
+        <input type="submit" name="submit" value="Submit" class="btn btn-primary form-control" id="submit-id-submit">
+    </div>
+</form>
+
+<ul>
+    {% for metric in metrics %}
+    <li>ns_id:{{ metric.ns_id }}/vdu_count:{{metric.vdu_count}}/file:{{metric.fr_list}}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+</body>
+</html>

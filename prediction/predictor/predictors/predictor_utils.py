@@ -19,7 +19,7 @@ Metrics = namedtuple("Metrics", ["CPU_LOAD", "TIMESTAMP", "VDU_COUNT", "NS_ID", 
 
 cpu_load_to_vdus = [Metrics(60 * y, "", y, "", "") for y in range(30)]
 
-lstm_model = pickle.load(open(os.path.join('predictor/predictors/trained_models', 'lstm_model.sav'), 'rb'))
+# lstm_model = pickle.load(open(os.path.join('predictor/predictors/trained_models', 'lstm_model.sav'), 'rb'))
 graph = tf.get_default_graph()
 
 log = logging.getLogger(__name__)

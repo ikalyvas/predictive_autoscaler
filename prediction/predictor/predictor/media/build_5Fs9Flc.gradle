@@ -1,0 +1,9 @@
+task firstTask << {
+println "This is the first task"
+}
+
+task secondTask(dependsOn:firstTask) << {
+println "This is the second task"
+}
+
+

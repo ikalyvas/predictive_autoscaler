@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_swagger',
-    'predictors'
+    'predictors',
+    'django_extensions'
 ]
 
 MIDDLEWARE = [
@@ -54,10 +55,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'predictor.urls'
 
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+print(TEMPLATE_DIR)
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_DIR, ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -159,3 +163,7 @@ LOGIN_DATA = {"username": "admin", "password": "admin"}
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# print(MEDIA_ROOT)
